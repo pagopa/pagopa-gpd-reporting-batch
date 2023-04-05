@@ -3,18 +3,20 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>it.gov.pagopa.project</groupId>
-    <artifactId>example-function</artifactId>
-    <version>0.0.1</version>
+    <groupId>it.gov.pagopa.reporting</groupId>
+    <artifactId>reporting-batch</artifactId>
+    <version>0.1.0</version>
     <packaging>jar</packaging>
 
-    <name>Azure Custom Fn</name>
+    <name>Azure Reporting-Batch Fn</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>11</java.version>
         <azure.functions.maven.plugin.version>1.15.0</azure.functions.maven.plugin.version>
         <azure.functions.java.library.version>1.4.2</azure.functions.java.library.version>
+        <azure.storage.table.version>8.6.6</azure.storage.table.version>
+        <azure.storage.queue.version>12.11.3</azure.storage.queue.version>
         <functionAppName>com.microsoft.azure-20220215182005862</functionAppName>
         <resteasy.version>3.15.3.Final</resteasy.version>
     </properties>
@@ -22,14 +24,21 @@
     <dependencies>
         <!-- Start Azure -->
         <dependency>
-            <groupId>org.modelmapper</groupId>
-            <artifactId>modelmapper</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.microsoft.azure.functions</groupId>
             <artifactId>azure-functions-java-library</artifactId>
             <version>${azure.functions.java.library.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>azure-storage</artifactId>
+            <version>${azure.storage.table.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-storage-queue</artifactId>
+            <version>${azure.storage.queue.version}</version>
         </dependency>
 
         <!-- End Azure -->
@@ -45,13 +54,20 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>4.3.1</version>
+            <version>2.23.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>4.3.1</version>
+            <version>2.23.4</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>1.16.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -119,7 +135,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.13.2.1</version>
+            <version>2.13.4.1</version>
         </dependency>
 
         <dependency>
@@ -148,6 +164,25 @@
 
     <build>
         <plugins>
+            <!-- START run init scripts -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <id>update-wsdl-location</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>${project.basedir}/upd_wsdl_location.sh</executable>
+                </configuration>
+            </plugin>
+            <!-- STOP  run init scripts -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -247,6 +282,38 @@
                     <!--suppress UnresolvedMavenProperty -->
                     <argLine>${argLine}</argLine>
                 </configuration>
+            </plugin>
+            <!-- wsdl 2 java -->
+            <plugin>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-codegen-plugin</artifactId>
+                <version>3.4.4</version>
+                <executions>
+                    <execution>
+                        <id>generate-sources</id>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <sourceRoot>target/generated</sourceRoot>
+                            <wsdlOptions>
+                                <wsdlOption>
+                                    <wsdl>src/main/resources/wsdl/NodoPerPa.wsdl</wsdl>
+                                    <wsdlLocation>classpath:wsdl/NodoPerPa.wsdl</wsdlLocation>
+                                    <extraargs>
+                                        <extraarg>-validate</extraarg>
+                                        <extraarg>-client</extraarg>
+                                        <extraarg>-verbose</extraarg>
+                                        <extraarg>-xjc-verbose</extraarg>
+                                        <extraarg>-p</extraarg>
+                                        <extraarg>it.gov.pagopa.reporting.servicewsdl</extraarg>
+                                    </extraargs>
+                                </wsdlOption>
+                            </wsdlOptions>
+                        </configuration>
+                        <goals>
+                            <goal>wsdl2java</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <!-- needed to use previously generated resources  -->
             <plugin>
