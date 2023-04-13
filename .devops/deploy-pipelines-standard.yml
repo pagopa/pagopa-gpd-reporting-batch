@@ -23,6 +23,8 @@ parameters:
     default: false
 
 variables:
+  REPOSITORY: reporting-batch
+
   ${{ if eq(parameters['ENV'], 'dev') }}:
     AZURE_SUBSCRIPTION: $(DEV_AZURE_SUBSCRIPTION)
     RESOURCE_GROUP: $(DEV_WEB_APP_RESOURCE_GROUP_NAME)
@@ -203,19 +205,29 @@ stages:
               containerRegistry: '$(dockerRegistryServiceConnection)'
               repository: '$(IMAGE_REPOSITORY)'
               command: 'buildAndPush'
+              Dockerfile: './${{ variables.REPOSITORY }}/Dockerfile.deploy'
               tags: |
                 $(Build.BuildId)
                 latest
                 $(pomversion.next)
 
-          # deploy project-fn
+          # deploy reporting-fn
           - task: AzureFunctionAppContainer@1
-            displayName: Deploy Function App [DEV]
+            displayName: Deploy Function App [DEV|UAT]
             inputs:
               azureSubscription: $(AZURE_SUBSCRIPTION)
-              appName: "${{variables.DEV_WEB_APP_NAME}}-fn-project"
-              imageName: "${{variables.DEV_CONTAINER_NAMESPACE}}/project:$(Build.BuildId)"
+              appName: "${{variables.APP_NAME}}-fn-gpd-batch"
+              imageName: "${{variables.CONTAINER_NAMESPACE}}/${{ variables.REPOSITORY }}:$(Build.BuildId)"
               slotName: production
+          - task: AzureFunctionAppContainer@1
+            displayName: Deploy Function App [PROD]
+            inputs:
+              azureSubscription: $(AZURE_SUBSCRIPTION)
+              appName: "${{variables.APP_NAME}}-fn-${{replace(variables.REPOSITORY, 'reporting', 'gpd')}}"
+              imageName: "${{variables.CONTAINER_NAMESPACE}}/${{ variables.REPOSITORY }}:$(Build.BuildId)"
+              deployToSlotOrASE: true
+              slotName: staging
+              resourceGroupName: $(RESOURCE_GROUP)
 
           - script: |
               echo "##vso[task.setvariable variable=version;isOutput=true]$(pomversion.next)"
