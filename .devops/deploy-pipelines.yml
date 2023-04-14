@@ -190,7 +190,7 @@ stages:
           # deploy reporting-fn
           - task: AzureFunctionAppContainer@1
             displayName: Deploy Function App [DEV|UAT]
-            condition: and(in('${{ parameters.ENV }}', 'dev', 'uat'))
+            condition: in('${{ parameters.ENV }}', 'dev', 'uat')
             inputs:
               azureSubscription: $(AZURE_SUBSCRIPTION)
               appName: "${{variables.APP_NAME}}-fn-gpd-batch"
@@ -198,7 +198,7 @@ stages:
               slotName: production
           - task: AzureFunctionAppContainer@1
             displayName: Deploy Function App [PROD]
-            condition: and(eq('${{ parameters.ENV }}', 'prod'))
+            condition: eq('${{ parameters.ENV }}', 'prod')
             inputs:
               azureSubscription: $(AZURE_SUBSCRIPTION)
               appName: "${{variables.APP_NAME}}-fn-${{replace(variables.imageRepository, 'reporting', 'gpd')}}"
