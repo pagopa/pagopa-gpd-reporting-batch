@@ -196,7 +196,7 @@ stages:
             inputs:
               azureSubscription: $(AZURE_SUBSCRIPTION)
               appName: "${{variables.APP_NAME}}-fn-gpd-batch"
-              imageName: "${{variables.CONTAINER_NAMESPACE}}/${{ variables.imageRepository }}:latest"
+              imageName: "${{variables.dockerNamespace}}/${{ variables.imageRepository }}:latest"
               slotName: production
               resourceGroupName: $(RESOURCE_GROUP)
           - task: AzureFunctionAppContainer@1
@@ -205,7 +205,7 @@ stages:
             inputs:
               azureSubscription: $(AZURE_SUBSCRIPTION)
               appName: "${{variables.APP_NAME}}-fn-${{replace(variables.imageRepository, 'reporting', 'gpd')}}"
-              imageName: "${{variables.CONTAINER_NAMESPACE}}/${{ variables.imageRepository }}:latest"
+              imageName: "${{variables.dockerNamespace}}/${{ variables.imageRepository }}:latest"
               deployToSlotOrASE: true
               slotName: staging
               resourceGroupName: $(RESOURCE_GROUP)
