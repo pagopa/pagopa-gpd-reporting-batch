@@ -30,7 +30,7 @@ variables:
     RESOURCE_GROUP: $(DEV_WEB_APP_RESOURCE_GROUP_NAME)
     APP_NAME: $(DEV_WEB_APP_NAME)
     STAGE: "d"
-    dockerRegistryServiceConnection: $(DEV_CONTAINER_REGISTRY)
+    dockerRegistryServiceConnection: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
     dockerNamespace: $(DEV_CONTAINER_NAMESPACE)
 
   ${{ if eq(parameters['ENV'], 'uat') }}:
@@ -38,7 +38,7 @@ variables:
     RESOURCE_GROUP: $(UAT_WEB_APP_RESOURCE_GROUP_NAME)
     APP_NAME: $(UAT_WEB_APP_NAME)
     STAGE: "u"
-    dockerRegistryServiceConnection: $(UAT_CONTAINER_REGISTRY)
+    dockerRegistryServiceConnection: $(UAT_CONTAINER_REGISTRY_SERVICE_CONN)
     dockerNamespace: $(UAT_CONTAINER_NAMESPACE)
 
   ${{ if eq(parameters['ENV'], 'prod') }}:
@@ -46,7 +46,7 @@ variables:
     RESOURCE_GROUP: $(PROD_WEB_APP_RESOURCE_GROUP_NAME)
     APP_NAME: $(PROD_WEB_APP_NAME)
     STAGE: "p"
-    dockerRegistryServiceConnection: $(PROD_CONTAINER_REGISTRY)
+    dockerRegistryServiceConnection: $(PROD_CONTAINER_REGISTRY_SERVICE_CONN)
     dockerNamespace: $(PROD_CONTAINER_NAMESPACE)
 
   ${{ if eq(variables['Build.SourceBranchName'], 'merge') }}:
