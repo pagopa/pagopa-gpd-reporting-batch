@@ -172,7 +172,7 @@ stages:
               containerRegistry: '$(dockerRegistryServiceConnection)'
               repository: '$(IMAGE_REPOSITORY)'
               command: 'buildAndPush'
-              Dockerfile: './${{ variables.REPOSITORY }}/Dockerfile.deploy'
+              Dockerfile: './Dockerfile'
               tags: |
                 $(Build.BuildId)
                 latest
