@@ -188,7 +188,7 @@ stages:
             displayName: Build and push an image to container registry
             inputs:
               containerRegistry: '$(dockerRegistryServiceConnection)'
-              repository: '$(IMAGE_REPOSITORY)'
+              repository: '$(variables.imageRepository)'
               command: 'buildAndPush'
               tags: |
                 $(Build.BuildId)
