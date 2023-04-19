@@ -119,39 +119,11 @@ stages:
     jobs:
       - job: "build"
         steps:
-          - script: |
-              echo ${{variables['Build.SourceBranchName']}}        
-              echo $(SOURCE_BRANCH)
-              echo $(TEST)
-
           - checkout: self
-            clean: true
             persistCredentials: true
-            submodules: true
 
           - script: |
-              echo "Checkout on $(SOURCE_BRANCH)"
               git checkout $(sourceBranch)
-            displayName: Checkout on source branch
-
-          - task: Cache@2
-            inputs:
-              key: 'maven | "$(Agent.OS)" | pom.xml'
-              restoreKeys: |
-                maven | "$(Agent.OS)"
-                maven
-              path: $(MAVEN_CACHE_FOLDER)
-            displayName: Set Maven Cache
-
-          - task: Bash@3
-            # When the maven task is installed, mvn can be used in a script
-            name: pomversion
-            inputs:
-              targetType: "inline"
-              script: |
-                version=$(mvn -f pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
-                echo "##vso[task.setvariable variable=next;isOutput=true]$version"
-              failOnStderr: true
 
           - task: Bash@3
             displayName: 'Update WSDL Location'
@@ -172,12 +144,6 @@ stages:
               effectivePomSkip: false
               sonarQubeRunAnalysis: false
 
-          - checkout: self
-            persistCredentials: true
-
-          - script: |
-              git checkout $(sourceBranch)
-            displayName: Checkout and update branch
           - template: templates/docker-release/template.yaml@pagopaCommons
             parameters:
               CONTAINER_REGISTRY_SERVICE_CONN: $(dockerRegistryServiceConnection)
