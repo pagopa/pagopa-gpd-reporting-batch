@@ -35,26 +35,28 @@ variables:
   ${{ if eq(parameters['ENV'], 'dev') }}:
     AZURE_SUBSCRIPTION: $(DEV_AZURE_SUBSCRIPTION)
     APP_NAME: $(DEV_WEB_APP_NAME)
+    NODO_HOST: $(DEV_NODO_HOST)
     STAGE: "d"
     RESOURCE_GROUP: 'pagopa-d-weu-gps-gpd-rg'
     dockerRegistryServiceConnection: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
     dockerNamespace: $(DEV_CONTAINER_NAMESPACE)
-
   ${{ if eq(parameters['ENV'], 'uat') }}:
     AZURE_SUBSCRIPTION: $(UAT_AZURE_SUBSCRIPTION)
     APP_NAME: $(UAT_WEB_APP_NAME)
+    NODO_HOST: $(UAT_NODO_HOST)
     STAGE: "u"
     RESOURCE_GROUP: 'pagopa-u-weu-gps-gpd-rg'
     dockerRegistryServiceConnection: $(UAT_CONTAINER_REGISTRY_SERVICE_CONN)
     dockerNamespace: $(UAT_CONTAINER_NAMESPACE)
-
   ${{ if eq(parameters['ENV'], 'prod') }}:
     AZURE_SUBSCRIPTION: $(PROD_AZURE_SUBSCRIPTION)
     APP_NAME: $(PROD_WEB_APP_NAME)
+    NODO_HOST: $(PROD_NODO_HOST)
     STAGE: "p"
     RESOURCE_GROUP: 'pagopa-p-weu-gps-gpd-rg'
     dockerRegistryServiceConnection: $(PROD_CONTAINER_REGISTRY_SERVICE_CONN)
     dockerNamespace: $(PROD_CONTAINER_NAMESPACE)
+
 
   ${{ if eq(variables['Build.SourceBranchName'], 'merge') }}:
     SOURCE_BRANCH: "main" # force to main branch
@@ -109,29 +111,6 @@ stages:
 
           - template: templates/maven-github-current-version/template.yaml@pagopaCommons
 
-  # Build and Push Docker Image
-  - stage: Build
-    dependsOn: Release
-    variables:
-      current_version: $[ stageDependencies.Release.make_release.outputs['current_version.value'] ]
-    jobs:
-      - job: "build"
-        steps:
-          - checkout: self
-            persistCredentials: true
-
-          - script: |
-              git checkout $(sourceBranch)
-            displayName: Checkout and update branch
-
-          - template: templates/docker-release/template.yaml@pagopaCommons
-            parameters:
-              CONTAINER_REGISTRY_SERVICE_CONN: $(dockerRegistryServiceConnection)
-              CONTAINER_REGISTRY_FQDN: $(dockerNamespace)
-              DOCKER_IMAGE_NAME: $(imageRepository)
-              DOCKER_IMAGE_TAG: $(current_version)
-              FORCE_REPLACE_DOCKER_IMAGE: ${{ parameters.FORCE_REPLACE_DOCKER_IMAGE }}
-
   # Deploy on Azure
   - stage: deploy
     variables:
@@ -158,6 +137,15 @@ stages:
               git checkout $(SOURCE_BRANCH)
             displayName: Checkout on source branch
 
+          #          - task: Bash@3
+          #            name: application_properties
+          #            inputs:
+          #              targetType: "inline"
+          #              script: |
+          #                cp src/main/resources/application-azure-$(STAGE).properties src/main/resources/application.properties
+          #                cat src/main/resources/application.properties
+          #              failOnStderr: true
+
           - task: Cache@2
             inputs:
               key: 'maven | "$(Agent.OS)" | pom.xml'
@@ -177,6 +165,13 @@ stages:
                 echo "##vso[task.setvariable variable=next;isOutput=true]$version"
               failOnStderr: true
 
+          - task: Bash@3
+            displayName: 'Update WSDL Location'
+            inputs:
+              targetType: 'inline'
+              script: |
+                sh upd_wsdl_location.sh $(NODO_HOST)
+
           - task: Maven@3
             inputs:
               mavenPomFile: 'pom.xml'
@@ -188,6 +183,17 @@ stages:
               mavenAuthenticateFeed: false
               effectivePomSkip: false
               sonarQubeRunAnalysis: false
+
+          - task: Docker@2
+            displayName: Build and push an image to container registry
+            inputs:
+              containerRegistry: '$(dockerRegistryServiceConnection)'
+              repository: '$(IMAGE_REPOSITORY)'
+              command: 'buildAndPush'
+              tags: |
+                $(Build.BuildId)
+                latest
+                $(pomversion.next)
 
           # deploy reporting-fn
           - task: AzureFunctionAppContainer@1
@@ -210,82 +216,7 @@ stages:
               slotName: staging
               resourceGroupName: $(RESOURCE_GROUP)
 
+
           - script: |
               echo "##vso[task.setvariable variable=version;isOutput=true]$(pomversion.next)"
             name: dockerTag
-
-
-#  # Run test
-#  - stage: test
-#    # run this stage only if 'test' is enabled
-#    condition: and(not(failed('deployJava')), eq('${{ parameters.TEST }}', 'true'))
-#    pool:
-#      vmImage: "ubuntu-latest"
-#    jobs:
-#      # is needed to wait for startup of application
-#      - job: waitStartup
-#        pool: Server
-#        steps:
-#          - task: Delay@1
-#            inputs:
-#              delayForMinutes: '10'
-#
-#      #      - job: integrationTests
-#      #        dependsOn: waitStartup
-#      #        steps:
-#      #          - script: |
-#      #              git checkout $(SOURCE_BRANCH)
-#
-#      #          - script: |
-#      #              yarn global add newman
-#      #            displayName: 'newman installation'
-#
-#      #          - script: |
-#      #              newman run api-test/Project.postman_collection.json --environment=api-test/Azure.postman_environment.json --reporters cli,junit --reporter-junit-export Results/api-config-TEST.xml --verbose
-#      #            displayName: 'Run api test'
-#      #            continueOnError: false
-#
-#      #          - task: PublishTestResults@2
-#      #            condition: always()
-#      #            inputs:
-#      #              testResultsFormat: 'JUnit'
-#      #              testResultsFiles: '**/*-TEST.xml'
-#      #              searchFolder: '$(System.DefaultWorkingDirectory)'
-#
-#      - job: deployUAT
-#        dependsOn: integrationTests
-#        variables:
-#          version: $[ stageDependencies.deploy.deployJava.outputs['dockerTag.version'] ]
-#        steps:
-#          - task: Maven@3
-#            inputs:
-#              mavenPomFile: 'pom.xml'
-#              publishJUnitResults: false
-#              javaHomeOption: 'JDKVersion'
-#              jdkVersionOption: '1.11'
-#              mavenVersionOption: 'Default'
-#              mavenOptions: '-Xmx3072m $(MAVEN_OPTS)'
-#              mavenAuthenticateFeed: false
-#              effectivePomSkip: false
-#              sonarQubeRunAnalysis: false
-#
-#          - task: Docker@2
-#            displayName: Build and push an image to UAT container registry
-#            inputs:
-#              containerRegistry: '$(UAT_CONTAINER_REGISTRY)'
-#              repository: '$(IMAGE_REPOSITORY)'
-#              command: 'buildAndPush'
-#              tags: |
-#                $(Build.BuildId)
-#                latest
-#                $(version)
-#
-#          # deploy project-fn
-#          - task: AzureFunctionAppContainer@1
-#            displayName: Deploy Function App [UAT]
-#            condition: in('${{ parameters.ENV }}', 'uat')
-#            inputs:
-#              azureSubscription: $(AZURE_SUBSCRIPTION)
-#              appName: "${{variables.UAT_WEB_APP_NAME}}-fn-project}"
-#              imageName: "${{variables.UAT_CONTAINER_NAMESPACE}}/project:$(Build.BuildId)"
-#              slotName: production
