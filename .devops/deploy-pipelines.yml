@@ -111,17 +111,14 @@ stages:
 
           - template: templates/maven-github-current-version/template.yaml@pagopaCommons
 
-  # Deploy on Azure
-  - stage: deploy
+  # Build and Push Docker Image
+  - stage: Build
+    dependsOn: Release
     variables:
       current_version: $[ stageDependencies.Release.make_release.outputs['current_version.value'] ]
-    condition: not(failed('releaseService'))
-    pool:
-      vmImage: "ubuntu-latest"
     jobs:
-      - job: deployJava
+      - job: "build"
         steps:
-
           - script: |
               echo ${{variables['Build.SourceBranchName']}}        
               echo $(SOURCE_BRANCH)
@@ -136,15 +133,6 @@ stages:
               echo "Checkout on $(SOURCE_BRANCH)"
               git checkout $(SOURCE_BRANCH)
             displayName: Checkout on source branch
-
-          #          - task: Bash@3
-          #            name: application_properties
-          #            inputs:
-          #              targetType: "inline"
-          #              script: |
-          #                cp src/main/resources/application-azure-$(STAGE).properties src/main/resources/application.properties
-          #                cat src/main/resources/application.properties
-          #              failOnStderr: true
 
           - task: Cache@2
             inputs:
@@ -184,19 +172,30 @@ stages:
               effectivePomSkip: false
               sonarQubeRunAnalysis: false
 
-          - task: Docker@2
-            displayName: Build and push image to container registry
-            inputs:
-              command: 'buildAndPush'
-              containerRegistry: '$(variables.dockerRegistryServiceConnection)'
-              repository: '${{ variables.imageRepository }}'
-              buildContext: './${{ variables.imageRepository }}'
-              Dockerfile: './${{ variables.imageRepository }}/Dockerfile'
-              tags: |
-                $(Build.BuildId)
-                latest
-                $(pomversion.next)
+          - checkout: self
+            persistCredentials: true
 
+          - script: |
+              git checkout $(sourceBranch)
+            displayName: Checkout and update branch
+          - template: templates/docker-release/template.yaml@pagopaCommons
+            parameters:
+              CONTAINER_REGISTRY_SERVICE_CONN: $(dockerRegistryServiceConnection)
+              CONTAINER_REGISTRY_FQDN: $(dockerNamespace)
+              DOCKER_IMAGE_NAME: $(imageRepository)
+              DOCKER_IMAGE_TAG: $(current_version)
+              FORCE_REPLACE_DOCKER_IMAGE: ${{ parameters.FORCE_REPLACE_DOCKER_IMAGE }}
+
+  # Deploy on Azure
+  - stage: deploy
+    variables:
+      current_version: $[ stageDependencies.Release.make_release.outputs['current_version.value'] ]
+    condition: not(failed('releaseService'))
+    pool:
+      vmImage: "ubuntu-latest"
+    jobs:
+      - job: deployJava
+        steps:
           # deploy reporting-fn
           - task: AzureFunctionAppContainer@1
             displayName: Deploy Function App [DEV|UAT]
