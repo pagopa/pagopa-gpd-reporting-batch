@@ -129,11 +129,6 @@ stages:
             persistCredentials: true
             submodules: true
 
-          - script: |
-              echo "Checkout on $(SOURCE_BRANCH)"
-              git checkout $(SOURCE_BRANCH)
-            displayName: Checkout on source branch
-
           - task: Cache@2
             inputs:
               key: 'maven | "$(Agent.OS)" | pom.xml'
