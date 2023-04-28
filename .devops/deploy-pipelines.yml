@@ -57,13 +57,10 @@ variables:
     dockerRegistryServiceConnection: $(PROD_CONTAINER_REGISTRY_SERVICE_CONN)
     dockerNamespace: $(PROD_CONTAINER_NAMESPACE)
 
-
   ${{ if eq(variables['Build.SourceBranchName'], 'merge') }}:
     SOURCE_BRANCH: "main" # force to main branch
   ${{ if ne(variables['Build.SourceBranchName'], 'merge') }}:
     SOURCE_BRANCH: ${{ variables['Build.SourceBranchName'] }}
-
-
 
   MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
   MAVEN_OPTS: "-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)"
@@ -100,7 +97,7 @@ stages:
           - ${{ if ne(parameters.SEMVER, 'skip') }}:
               - template: templates/maven-github-release/template.yaml@pagopaCommons
                 parameters:
-                  release_branch: $(sourceBranch)
+                  release_branch: $(SOURCE_BRANCH)
                   gitEmail: $(GIT_EMAIL)
                   gitUsername: $(GIT_USERNAME)
                   gitHubConnection: $(GITHUB_CONNECTION)
@@ -173,7 +170,7 @@ stages:
               slotName: production
               resourceGroupName: $(RESOURCE_GROUP)
           - task: AzureFunctionAppContainer@1
-            displayName: Deploy Function App [PROD]
+            displayName: Deploy Function App [PROD] staging
             condition: eq('${{ parameters.ENV }}', 'prod')
             inputs:
               azureSubscription: $(AZURE_SUBSCRIPTION)
@@ -182,7 +179,6 @@ stages:
               deployToSlotOrASE: true
               slotName: staging
               resourceGroupName: $(RESOURCE_GROUP)
-
 
           - script: |
               echo "##vso[task.setvariable variable=version;isOutput=true]$(pomversion.next)"
