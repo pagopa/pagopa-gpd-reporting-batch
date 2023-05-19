@@ -26,7 +26,7 @@ public class Info {
 			authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
 			final ExecutionContext context) {
 
-		context.getLogger().log(Level.INFO, "Invoked health check HTTP trigger for pagopa-gpd-reporting-batchß.");
+		context.getLogger().log(Level.INFO, "Invoked health check HTTP trigger for pagopa-gpd-reporting-batch.");
 		return request.createResponseBuilder(HttpStatus.OK)
 					   .header("Content-Type", "application/json")
 					   .build();
