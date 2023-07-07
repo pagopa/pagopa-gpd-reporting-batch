@@ -18,13 +18,12 @@ import java.util.logging.Logger;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class InfoTest {
 
-	@Mock
+    @Mock
     ExecutionContext context;
 
     @Spy
@@ -32,6 +31,11 @@ class InfoTest {
 
     @Test
     void runOK() {
+
+        // Mocking service creation
+        Logger logger = Logger.getLogger("example-test-logger");
+        when(context.getLogger()).thenReturn(logger);
+
         // test precondition
         final HttpResponseMessage.Builder builder = mock(HttpResponseMessage.Builder.class);
         @SuppressWarnings("unchecked")
