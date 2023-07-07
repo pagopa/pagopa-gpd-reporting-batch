@@ -37,7 +37,7 @@ steps:
         sonar.projectKey=$(SONARCLOUD_PROJECT_KEY)
         sonar.projectName=$(SONARCLOUD_PROJECT_NAME)
         sonar.coverage.exclusions=**/config/*,**/*Mock*,**/model/**,**/entity/*
-        sonar.cpd.exclusions=**/model/**,**/entity/*
+        sonar.cpd.exclusions=**/models/**,**/entity/*
       
 
   - task: Maven@3
