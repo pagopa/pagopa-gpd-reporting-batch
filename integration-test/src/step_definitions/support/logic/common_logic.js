@@ -1,8 +1,8 @@
 const assert = require("assert");
 
-async function assertEmptyList(response) {
-    console.log(` - -> the client receives an empty list of flows..`);
-    assert.ok(response.data.length === 0);
+async function assertEmptyList(response, flows) {
+    console.log(` - -> the client receives an empty list of flows: ${(response.data.length - flows.size)} flows`);
+    assert.ok((response.data.length - flows.size) === 0);
 }
 
 async function assertNonEmptyList(response) {

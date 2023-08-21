@@ -20,8 +20,9 @@ const {
     retrieveReportFlow,
     sendReportFlowToNode, 
     waitWholeReportingProcessExecution,
+    getCurrentListSize
 } = require('./logic/reporting_logic');
-const { bundle } = require('./utility/data');
+const { bundle, flows } = require('./utility/data');
 
 /* Setting defaul timeout to 10s. */
 setDefaultTimeout(120 * 1000);
@@ -42,6 +43,7 @@ Given('reporting analysis service running', () => executeHealthCheckForReporting
 Given('a not paid debt position', () => generateDebtPosition(bundle, true));
 Given('a paid debt position', () => generateAndPayDebtPosition(bundle));
 Given('a report flow sent to Node', () => sendReportFlowToNode(bundle));
+Given('the current flows list size', () => getCurrentListSize(bundle, flows));
 
 
 /* 
@@ -63,7 +65,7 @@ Then('the client asks the detail for the analyzed debt positions', () => retriev
  */
 Then('the client receives status code {int}', (statusCode) => assertStatusCode(bundle.response, statusCode));
 Then('the client receives a non-empty list of flows', () => assertNonEmptyList(bundle.response));
-Then('the client receives an empty list of flows', () => assertEmptyList(bundle.response));
+Then('the client receives an empty list of new flows', () => assertEmptyList(bundle.response, flows));
 Then('the client receives the flow XML content', () => assertFlowXMLContent(bundle.response, bundle.flow.id));
 Then('the client receives the payment options with status {string}', (status) => assertPaymentOptionStatus(bundle.response, status));
 

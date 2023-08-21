@@ -40,6 +40,14 @@ async function sendReportFlowToNode(bundle) {
     assert.match(response.data, new RegExp(`<totRestituiti>.+</totRestituiti>`, "g")); 
 }
 
+async function getCurrentListSize(bundle, flows) {
+    console.log(` - Then the client asks the flow list for the organization with id [${bundle.creditorInstitution.id}]..`);
+    bundle.response = await getFlowList(bundle.creditorInstitution.id);
+    debugLog(`Report flow list retrieving API invocation returned HTTP status code: ${bundle.response.status} with body: ${JSON.stringify(bundle.response.data)}`);
+    flows.size = bundle.response.data.length;
+    console.log(` - -> the client receives a list of ${flows.size} flows`);
+}
+
 async function waitWholeReportingProcessExecution() {
     console.log(` - -> the client waits its execution for [${process.env.reporting_batch_wait_execution_sec}] seconds. Please wait..`);
     await new Promise(resolve => setTimeout(resolve, process.env.reporting_batch_wait_execution_sec * 1000));
@@ -52,5 +60,6 @@ module.exports = {
     retrieveReportFlow,
     retrieveReportFlowList,
     sendReportFlowToNode,
-    waitWholeReportingProcessExecution
+    waitWholeReportingProcessExecution,
+    getCurrentListSize
 }
