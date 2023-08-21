@@ -199,7 +199,7 @@ stages:
             inputs:
               azureSubscription: $(AZURE_SUBSCRIPTION)
               appName: "${{variables.APP_NAME}}-fn-gpd-batch"
-              imageName: "${{variables.dockerNamespace}}/${{ variables.imageRepository }}:latest"
+              imageName: "${{variables.DOCKER_NAMESPACE}}/${{ variables.imageRepository }}:latest"
               deployToSlotOrASE: true
               slotName: staging
               resourceGroupName: $(RESOURCE_GROUP)
