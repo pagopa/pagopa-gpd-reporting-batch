@@ -39,7 +39,9 @@ jobs:
         shell: bash
         run: |
           export CANARY=${{ inputs.canary }}
-          
+          export REPORTING_BATCH_QUEUE=${{ secrets.REPORTING_BATCH_QUEUE }}
+          export FLOW_SA_CONNECTION_STRING=${{ secrets.FLOW_SA_CONNECTION_STRING }}
+
           cd ./integration-test
           chmod +x ./run_integration_test.sh
           ./run_integration_test.sh ${{( github.event.inputs == null && 'uat') || inputs.environment }} ${{ secrets.API_SUBSCRIPTION_KEY }}
