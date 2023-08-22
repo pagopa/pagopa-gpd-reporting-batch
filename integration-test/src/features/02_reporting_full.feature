@@ -1,4 +1,4 @@
-# Feature: All about flow report retrieving workflow - Complete flow
+Feature: All about flow report retrieving workflow - Complete flow
 
   Background:
     Given GPD service running
@@ -6,7 +6,7 @@
     * GPD Payments service running
     * reporting analysis service running
     * a paid debt position
-    * a report flow sent to Node 
+    * a report flow sent to Node
 
   Scenario: Reporting - Complete Happy path
     When the reporting batch analyzes the reporting flows for the organization
