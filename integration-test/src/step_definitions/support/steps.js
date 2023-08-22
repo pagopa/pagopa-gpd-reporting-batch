@@ -2,13 +2,16 @@ const { Before, BeforeStep, Given, setDefaultTimeout, Then, When } = require('@c
 const { 
     assertEmptyList,
     assertNonEmptyList,
-    assertStatusCode
+    assertStatusCode,
+    assertFlowXMLContent,
+    assertPaymentOptionStatus
 } = require('./logic/common_logic');
 const { 
     generateAndPayDebtPosition, 
     generateDebtPosition,
+    retrievePaymentOptionDetail
 } = require('./logic/gpd_logic');
-const { 
+const {
     executeHealthCheckForAPIConfig, 
     executeHealthCheckForGPD, 
     executeHealthCheckForGPDPayments,
