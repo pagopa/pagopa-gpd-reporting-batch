@@ -95,6 +95,11 @@ let bundle = {
     response: undefined
 };
 
+let flows = {
+    size: 0
+}
+
 module.exports = {
-    bundle
+    bundle,
+    flows
 }

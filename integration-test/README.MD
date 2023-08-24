@@ -5,7 +5,6 @@
 
 To run the integration test from local environment, simply execute this commands:
 ```
-export REPORTING_BATCH_CONNECTION_STRING=##QUEUE_CONNECTION_STRING## \    
 yarn install && \
 yarn test:${{ parameters.ENV }} ${{ secrets.API_SUBSCRIPTION_KEY }}
 ```
