@@ -41,3 +41,8 @@ data "azurerm_key_vault_secret" "key_vault_integration_test_subkey" {
   name         = "integration-test-subkey"
   key_vault_id = data.azurerm_key_vault.key_vault.id
 }
+
+data "azurerm_key_vault_secret" "flow_sa_connection_string" {
+  name         = "flows-sa-${var.env_short}-connection-string"
+  key_vault_id = data.azurerm_key_vault.domain_key_vault.id
+}

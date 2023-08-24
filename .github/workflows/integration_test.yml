@@ -40,7 +40,7 @@ jobs:
         shell: bash
         run: |
           export CANARY=${{ inputs.canary }}
-          export REPORTING_BATCH_QUEUE=${{ secrets.REPORTING_BATCH_QUEUE }}
+          export REPORTING_BATCH_QUEUE=${{ vars.REPORTING_BATCH_QUEUE }}
           export FLOW_SA_CONNECTION_STRING="${{ secrets.FLOW_SA_CONNECTION_STRING }}"
 
           cd ./integration-test
