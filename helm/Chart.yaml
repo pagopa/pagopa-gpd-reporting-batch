@@ -2,8 +2,8 @@ apiVersion: v2
 name: pagopa-functions-template
 description: Microservice description
 type: application
-version: 0.2.0
-appVersion: 0.1.4-1-PAGOPA-1176-creare-un-gha-per-deploy-azure-function
+version: 0.3.0
+appVersion: 0.1.4-2-PAGOPA-1176-creare-un-gha-per-deploy-azure-function
 dependencies:
   - name: microservice-chart
     version: 1.21.0
