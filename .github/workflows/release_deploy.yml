@@ -128,8 +128,8 @@ jobs:
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@v3
 
-      - name: Login
-        uses: azure/login@89d153571fe9a34ed70fcf9f1d95ab8debea7a73
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v1
         with:
           client-id: ${{ secrets.CLIENT_ID }}
           tenant-id: ${{ secrets.TENANT_ID }}
