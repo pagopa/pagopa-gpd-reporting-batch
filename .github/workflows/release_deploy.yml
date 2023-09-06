@@ -122,6 +122,7 @@ jobs:
   deploy_azure_fn:
     name: Deploy Azure function
     needs: [ setup, release, build-and-push ]
+    runs-on: ubuntu-latest
     if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
     steps:
       - name: 'Checkout GitHub Action'
