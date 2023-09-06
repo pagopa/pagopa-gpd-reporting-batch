@@ -109,7 +109,7 @@ jobs:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
     if: ${{ inputs.semver != 'skip' }}
-    environment: dev
+    environment: ${{ inputs.environment }}
     steps:
       - name: Build and Push
         id: semver
@@ -121,6 +121,7 @@ jobs:
 
   deploy_azure_fn:
     name: Deploy Azure function
+    environment: ${{ inputs.environment }}
     needs: [ setup, release, build-and-push ]
     runs-on: ubuntu-latest
     if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
