@@ -38,7 +38,7 @@ permissions:
 env:
   REGISTRY: 'ghcr.io'
   NAMESPACE: 'pagopa'
-  IMAGE: 'gpd-reporting-batch'
+  IMAGE: 'pagopa-gpd-reporting-batch'
 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -131,9 +131,9 @@ jobs:
       - name: Login
         uses: azure/login@89d153571fe9a34ed70fcf9f1d95ab8debea7a73
         with:
-          client-id: ${{ inputs.CLIENT_ID }}
-          tenant-id: ${{ inputs.TENANT_ID }}
-          subscription-id: ${{ inputs.SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.CLIENT_ID }}
+          tenant-id: ${{ secrets.TENANT_ID }}
+          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
       - name: 'Run Azure Functions Container Action'
         uses: Azure/functions-container-action@v1
