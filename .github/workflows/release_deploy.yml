@@ -137,8 +137,7 @@ jobs:
           subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
       - name: 'Run Azure Functions Container Action'
-        uses: Azure/functions-container-action@v1
-        id: fa
+        uses: Azure/functions-container-action@v1.2.0
         env:
           ENV_SHORT: ${{ (contains(github.event.inputs.environment,'dev') && 'd') || (contains(github.event.inputs.environment, 'uat') && 'u') || (contains(github.event.inputs.environment, 'prod') && 'p') }}
           TAG: ${{needs.release.outputs.version}}
