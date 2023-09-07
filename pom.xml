@@ -5,7 +5,7 @@
 
     <groupId>it.gov.pagopa.reporting</groupId>
     <artifactId>reporting-batch</artifactId>
-    <version>0.1.4-6-PAGOPA-1176-creare-un-gha-per-deploy-azure-function</version>
+    <version>0.1.4-7-PAGOPA-1176-creare-un-gha-per-deploy-azure-function</version>
     <packaging>jar</packaging>
 
     <name>Azure Reporting-Batch Fn</name>
