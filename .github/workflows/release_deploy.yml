@@ -136,6 +136,18 @@ jobs:
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
+      - name: Retrieve publish profile for deployment
+        id: publishProfileRetrieval
+        env:
+          ENV_SHORT: ${{ (contains(github.event.inputs.environment,'dev') && 'd') || (contains(github.event.inputs.environment, 'uat') && 'u') || (contains(github.event.inputs.environment, 'prod') && 'p') }}
+        run: |
+          publishProfiles=$(az webapp deployment list-publishing-profiles \
+            --name "pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch" \
+            --resource-group "pagopa-${{ env.ENV.SHORT }}-weu-gps-gpd-rg" \
+            --subscription "${{ secrets.SUBSCRIPTION_ID }}" --xml)
+          echo "::add-mask::$publishProfiles"
+          echo "::set-output name=publishProfiles::$publishProfiles"
+
       - name: 'Run Azure Functions Container Action'
         uses: Azure/functions-container-action@v1
         env:
@@ -144,6 +156,7 @@ jobs:
         with:
           app-name: "pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch"
           image: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE }}:${{ env.TAG }}
+          publish-profile: ${{ steps.publishProfileRetrieval.outputs.publishProfiles }}
 
       - name: Azure logout
         run: |
