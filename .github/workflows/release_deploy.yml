@@ -143,7 +143,7 @@ jobs:
         run: |
           publishProfiles=$(az webapp deployment list-publishing-profiles \
             --name "pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch" \
-            --resource-group "pagopa-${{ env.ENV.SHORT }}-weu-gps-gpd-rg" \
+            --resource-group "pagopa-d-weu-gps-gpd-rg" \
             --subscription "${{ secrets.SUBSCRIPTION_ID }}" --xml)
           echo "::add-mask::$publishProfiles"
           echo "::set-output name=publishProfiles::$publishProfiles"
