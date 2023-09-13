@@ -144,6 +144,7 @@ jobs:
         with:
           app-name: "pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch"
           image: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE }}:${{ env.TAG }}
+          slot-name: production
 
       - name: Azure logout
         run: |
