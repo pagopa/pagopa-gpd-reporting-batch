@@ -126,17 +126,6 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
     steps:
-      - name: "Manual approval test"
-        uses: trstringer/manual-approval@v1
-        with:
-          secret: ${{ secrets.BOT_TOKEN_GITHUB }}
-          approvers: pagopa-team-core
-          minimum-approvals: 1
-          issue-title: "Approval test"
-          issue-body: "Approval test"
-          exclude-workflow-initiator-as-approver: false
-          timeout-minutes: 360
-
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@v3
 
@@ -168,7 +157,7 @@ jobs:
           image: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE }}:${{ env.TAG }}
           slot-name: production
 
-      - name: 'Run Azure Functions Container Action PROD'
+      - name: 'Run Azure Functions Container Action PROD: staging slot'
         uses: Azure/functions-container-action@v1.2.1
         if: ${{ contains(github.event.inputs.environment, 'prod')}}
         env:
@@ -179,7 +168,7 @@ jobs:
           image: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE }}:${{ env.TAG }}
           slot-name: staging
 
-      - name: "Deploy Approval"
+      - name: 'Deploy Approval'
         uses: trstringer/manual-approval@v1
         if: ${{ contains(github.event.inputs.environment, 'prod')}}
         with:
@@ -191,7 +180,7 @@ jobs:
           exclude-workflow-initiator-as-approver: false
           timeout-minutes: 360
 
-      - name: 'Run Azure Functions Container Action PROD'
+      - name: 'Run Azure Functions Container Action PROD: production slot'
         uses: Azure/functions-container-action@v1.2.1
         if: ${{ contains(github.event.inputs.environment, 'prod')}}
         env:
