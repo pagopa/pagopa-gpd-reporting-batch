@@ -12,6 +12,10 @@ data "github_organization_teams" "all" {
   summary_only    = true
 }
 
+data "azurerm_resource_group" "gpd_rg" {
+  name  = "pagopa-${var.env_short}-weu-gps-gpd-rg"
+}
+
 data "azurerm_key_vault" "key_vault" {
   name                = "pagopa-${var.env_short}-kv"
   resource_group_name = "pagopa-${var.env_short}-sec-rg"

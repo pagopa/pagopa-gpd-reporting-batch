@@ -38,7 +38,7 @@ permissions:
 env:
   REGISTRY: 'ghcr.io'
   NAMESPACE: 'pagopa'
-  IMAGE: 'gpd-reporting-batch'
+  IMAGE: 'pagopa-gpd-reporting-batch'
 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -109,7 +109,7 @@ jobs:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
     if: ${{ inputs.semver != 'skip' }}
-    environment: dev
+    environment: ${{ inputs.environment }}
     steps:
       - name: Build and Push
         id: semver
@@ -121,28 +121,83 @@ jobs:
 
   deploy_azure_fn:
     name: Deploy Azure function
+    environment: ${{ inputs.environment }}
     needs: [ setup, release, build-and-push ]
+    runs-on: ubuntu-latest
     if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
     steps:
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@v3
 
-      - name: Login
-        uses: azure/login@89d153571fe9a34ed70fcf9f1d95ab8debea7a73
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v1
         with:
-          client-id: ${{ inputs.CLIENT_ID }}
-          tenant-id: ${{ inputs.TENANT_ID }}
-          subscription-id: ${{ inputs.SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.CLIENT_ID }}
+          tenant-id: ${{ secrets.TENANT_ID }}
+          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
-      - name: 'Run Azure Functions Container Action'
-        uses: Azure/functions-container-action@v1
-        id: fa
+      - name: 'Azure CLI script: start staging slot'
+        uses: azure/CLI@v1
+        if: ${{ contains(github.event.inputs.environment, 'prod') }}
         env:
-          ENV_SHORT: ${{ (contains(github.event.inputs.environment,'dev') && 'd') || (contains(github.event.inputs.environment, 'uat') && 'u') || (contains(github.event.inputs.environment, 'prod') && 'p') }}
+          ENV_SHORT: ${{ (contains(github.event.inputs.environment,'prod') && 'p') }}
+        with:
+          inlineScript: |
+            az functionapp start --name pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch --resource-group pagopa-${{ env.ENV_SHORT }}-weu-gps-gpd-rg --slot staging
+
+      - name: 'Run Azure Functions Container Action DEV|UAT: deploy on production slot'
+        uses: Azure/functions-container-action@v1.2.1
+        if: ${{ contains(github.event.inputs.environment, 'dev') || contains(github.event.inputs.environment, 'uat') }}
+        env:
+          ENV_SHORT: ${{ (contains(github.event.inputs.environment,'dev') && 'd') || (contains(github.event.inputs.environment, 'uat') && 'u') }}
           TAG: ${{needs.release.outputs.version}}
         with:
-          app-name: pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch
+          app-name: "pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch"
           image: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE }}:${{ env.TAG }}
+          slot-name: production
+
+      - name: 'Run Azure Functions Container Action PROD: deploy on staging slot'
+        uses: Azure/functions-container-action@v1.2.1
+        if: ${{ contains(github.event.inputs.environment, 'prod') }}
+        env:
+          ENV_SHORT: ${{ (contains(github.event.inputs.environment,'prod') && 'p') }}
+          TAG: ${{needs.release.outputs.version}}
+        with:
+          app-name: "pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch"
+          image: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE }}:${{ env.TAG }}
+          slot-name: staging
+
+      - name: 'PROD Deploy Approval'
+        uses: trstringer/manual-approval@v1
+        if: ${{ contains(github.event.inputs.environment, 'prod') }}
+        with:
+          secret: ${{ secrets.BOT_TOKEN_GITHUB }}
+          approvers: pagopa-team-core
+          minimum-approvals: 1
+          issue-title: "Deploying ${{ env.TAG }} to prod from staging"
+          issue-body: "Please approve or deny the deployment of version ${{ env.TAG }}."
+          exclude-workflow-initiator-as-approver: false
+          timeout-minutes: 360
+
+      - name: 'Run Azure Functions Container Action PROD: deploy on production slot'
+        uses: Azure/functions-container-action@v1.2.1
+        if: ${{ contains(github.event.inputs.environment, 'prod') }}
+        env:
+          ENV_SHORT: ${{ (contains(github.event.inputs.environment,'prod') && 'p') }}
+          TAG: ${{needs.release.outputs.version}}
+        with:
+          app-name: "pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch"
+          image: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE }}:${{ env.TAG }}
+          slot-name: production
+
+      - name: 'Azure CLI script: stop staging slot'
+        uses: azure/CLI@v1
+        if: ${{ contains(github.event.inputs.environment, 'prod') }}
+        env:
+          ENV_SHORT: ${{ (contains(github.event.inputs.environment,'prod') && 'p') }}
+        with:
+          inlineScript: |
+            az functionapp stop --name pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch --resource-group pagopa-${{ env.ENV_SHORT }}-weu-gps-gpd-rg --slot staging
 
       - name: Azure logout
         run: |
