@@ -136,40 +136,40 @@ jobs:
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
-      - name: Azure CLI script
+      - name: 'Azure CLI script: start staging slot'
         uses: azure/CLI@v1
-        if: ${{ contains(github.event.inputs.environment, 'prod') || contains(github.event.inputs.environment, 'uat') }}
+        if: ${{ contains(github.event.inputs.environment, 'prod') }}
         env:
-          ENV_SHORT: ${{ (contains(github.event.inputs.environment,'prod') && 'p') || (contains(github.event.inputs.environment, 'uat') && 'u') }}
+          ENV_SHORT: ${{ (contains(github.event.inputs.environment,'prod') && 'p') }}
         with:
           inlineScript: |
             az functionapp start --name pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch --resource-group pagopa-${{ env.ENV_SHORT }}-weu-gps-gpd-rg --slot staging
 
-      - name: 'Run Azure Functions Container Action DEV|UAT'
+      - name: 'Run Azure Functions Container Action DEV|UAT: deploy on production slot'
         uses: Azure/functions-container-action@v1.2.1
-        if: ${{ contains(github.event.inputs.environment, 'dev') }}
+        if: ${{ contains(github.event.inputs.environment, 'dev') || contains(github.event.inputs.environment, 'uat') }}
         env:
-          ENV_SHORT: ${{ (contains(github.event.inputs.environment,'dev') && 'd') }}
+          ENV_SHORT: ${{ (contains(github.event.inputs.environment,'dev') && 'd') || (contains(github.event.inputs.environment, 'uat') && 'u') }}
           TAG: ${{needs.release.outputs.version}}
         with:
           app-name: "pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch"
           image: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE }}:${{ env.TAG }}
           slot-name: production
 
-      - name: 'Run Azure Functions Container Action PROD: staging slot'
+      - name: 'Run Azure Functions Container Action PROD: deploy on staging slot'
         uses: Azure/functions-container-action@v1.2.1
-        if: ${{ contains(github.event.inputs.environment, 'prod') || contains(github.event.inputs.environment, 'uat') }}
+        if: ${{ contains(github.event.inputs.environment, 'prod') }}
         env:
-          ENV_SHORT: ${{ (contains(github.event.inputs.environment,'prod') && 'p') || (contains(github.event.inputs.environment, 'uat') && 'u') }}
+          ENV_SHORT: ${{ (contains(github.event.inputs.environment,'prod') && 'p') }}
           TAG: ${{needs.release.outputs.version}}
         with:
           app-name: "pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch"
           image: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE }}:${{ env.TAG }}
           slot-name: staging
 
-      - name: 'Deploy Approval'
+      - name: 'PROD Deploy Approval'
         uses: trstringer/manual-approval@v1
-        if: ${{ contains(github.event.inputs.environment, 'prod') || contains(github.event.inputs.environment, 'uat') }}
+        if: ${{ contains(github.event.inputs.environment, 'prod') }}
         with:
           secret: ${{ secrets.BOT_TOKEN_GITHUB }}
           approvers: pagopa-team-core
@@ -179,22 +179,22 @@ jobs:
           exclude-workflow-initiator-as-approver: false
           timeout-minutes: 360
 
-      - name: 'Run Azure Functions Container Action PROD: production slot'
+      - name: 'Run Azure Functions Container Action PROD: deploy on production slot'
         uses: Azure/functions-container-action@v1.2.1
-        if: ${{ contains(github.event.inputs.environment, 'prod') || contains(github.event.inputs.environment, 'uat') }}
+        if: ${{ contains(github.event.inputs.environment, 'prod') }}
         env:
-          ENV_SHORT: ${{ (contains(github.event.inputs.environment,'prod') && 'p') || (contains(github.event.inputs.environment, 'uat') && 'u') }}
+          ENV_SHORT: ${{ (contains(github.event.inputs.environment,'prod') && 'p') }}
           TAG: ${{needs.release.outputs.version}}
         with:
           app-name: "pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch"
           image: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE }}:${{ env.TAG }}
           slot-name: production
 
-      - name: Azure CLI script
+      - name: 'Azure CLI script: stop staging slot'
         uses: azure/CLI@v1
-        if: ${{ contains(github.event.inputs.environment, 'prod') || contains(github.event.inputs.environment, 'uat') }}
+        if: ${{ contains(github.event.inputs.environment, 'prod') }}
         env:
-          ENV_SHORT: ${{ (contains(github.event.inputs.environment,'prod') && 'p') || (contains(github.event.inputs.environment, 'uat') && 'u') }}
+          ENV_SHORT: ${{ (contains(github.event.inputs.environment,'prod') && 'p') }}
         with:
           inlineScript: |
             az functionapp stop --name pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch --resource-group pagopa-${{ env.ENV_SHORT }}-weu-gps-gpd-rg --slot staging
