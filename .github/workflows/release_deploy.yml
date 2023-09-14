@@ -141,10 +141,9 @@ jobs:
         if: ${{ contains(github.event.inputs.environment, 'prod') || contains(github.event.inputs.environment, 'uat') }}
         env:
           ENV_SHORT: ${{ (contains(github.event.inputs.environment,'prod') && 'p') || (contains(github.event.inputs.environment, 'uat') && 'u') }}
-          RESOURCE_GROUP: pagopa-${{ env.ENV_SHORT }}-weu-gps-gpd-rg
         with:
           inlineScript: |
-            az functionapp start --name pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch --resource-group ${{ env.RESOURCE_GROUP }} --slot staging
+            az functionapp start --name pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch --resource-group pagopa-${{ env.ENV_SHORT }}-weu-gps-gpd-rg --slot staging
 
       - name: 'Run Azure Functions Container Action DEV|UAT'
         uses: Azure/functions-container-action@v1.2.1
@@ -196,10 +195,9 @@ jobs:
         if: ${{ contains(github.event.inputs.environment, 'prod') || contains(github.event.inputs.environment, 'uat') }}
         env:
           ENV_SHORT: ${{ (contains(github.event.inputs.environment,'prod') && 'p') || (contains(github.event.inputs.environment, 'uat') && 'u') }}
-          RESOURCE_GROUP: pagopa-${{ env.ENV_SHORT }}-weu-gps-gpd-rg
         with:
           inlineScript: |
-            az functionapp stop --name pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch --resource-group ${{ env.RESOURCE_GROUP }} --slot staging
+            az functionapp stop --name pagopa-${{ env.ENV_SHORT }}-weu-fn-gpd-batch --resource-group pagopa-${{ env.ENV_SHORT }}-weu-gps-gpd-rg --slot staging
 
       - name: Azure logout
         run: |
