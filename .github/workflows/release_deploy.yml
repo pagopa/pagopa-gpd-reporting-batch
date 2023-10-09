@@ -111,13 +111,39 @@ jobs:
     if: ${{ inputs.semver != 'skip' }}
     environment: ${{ inputs.environment }}
     steps:
-      - name: Build and Push
-        id: semver
-        uses: pagopa/github-actions-template/ghcr-build-push@v1.5.4
+      - uses: actions/checkout@v3
         with:
-          branch: ${{ github.ref_name}}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.release.outputs.version }}
+          ref: ${{ needs.release.outputs.version }}
+
+      - name: Update WSDL Location
+        run: sh upd_wsdl_location.sh ${{ env.NODO_HOST }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4.3.0
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            latest
+            ${{ needs.release.outputs.version }}
+            type=ref,event=branch
+            type=sha
+
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: ${{ inputs.build_args }}
 
   deploy_azure_fn:
     name: Deploy Azure function
