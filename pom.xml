@@ -19,6 +19,7 @@
         <azure.storage.queue.version>12.11.3</azure.storage.queue.version>
         <functionAppName>com.microsoft.azure-20220215182005862</functionAppName>
         <resteasy.version>3.15.3.Final</resteasy.version>
+        <google-api-client.version>2.0.1</google-api-client.version>
     </properties>
 
     <dependencies>
@@ -150,6 +151,18 @@
             <version>2.13.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client-gson</artifactId>
+            <version>${google-api-client.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client-jackson2</artifactId>
+            <version>1.42.3</version>
+        </dependency>
+
         <!-- Jackson END-->
 
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
@@ -170,8 +183,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <source>16</source>
+                    <target>16</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
