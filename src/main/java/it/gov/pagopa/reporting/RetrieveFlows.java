@@ -141,6 +141,9 @@ public class RetrieveFlows {
             cacheContent = null;
             logger.log(Level.SEVERE, e.getMessage());
             throw new RuntimeException(e.getMessage());
+        } catch (Exception e) {
+            cacheContent = null;
+            logger.log(Level.SEVERE, e.getMessage());
         }
     }
 }
