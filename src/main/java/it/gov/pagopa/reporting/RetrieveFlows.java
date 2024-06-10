@@ -58,7 +58,9 @@ public class RetrieveFlows {
         FlowsService flowsService = this.getFlowsServiceInstance(logger);
         ApiConfigClient cacheClient = ApiConfigClient.getInstance();
         if(cacheContent == null || (cacheContent.getRetrieveDate() != null && cacheContent.getRetrieveDate().isBefore(LocalDateTime.now()))) {
-            setCache(cacheClient, logger);
+            synchronized (RetrieveFlows.class) {
+                setCache(cacheClient, logger);
+            }
         }
 
         try {
