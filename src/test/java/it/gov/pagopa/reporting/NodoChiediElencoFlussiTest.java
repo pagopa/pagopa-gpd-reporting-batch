@@ -52,7 +52,9 @@ class NodoChiediElencoFlussiTest {
         keyField.set(nodoChiediElencoFlussi, myPort);
 
         String idPa = "12345";
-        nodoChiediElencoFlussi.nodoChiediElencoFlussiRendicontazione(idPa);
+        String idBroker = "123456";
+        String idStazione = "123456_00";
+        nodoChiediElencoFlussi.nodoChiediElencoFlussiRendicontazione(idPa, idBroker, idStazione);
 
         assertTrue(Boolean.TRUE);
     }

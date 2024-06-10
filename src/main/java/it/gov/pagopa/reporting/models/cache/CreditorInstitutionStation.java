@@ -11,6 +11,7 @@ import lombok.*;
 @Setter
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Builder
 public class CreditorInstitutionStation {
 
     @JsonProperty(value = "creditor_institution_code")

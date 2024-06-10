@@ -56,7 +56,7 @@ public class RetrieveFlows {
 
         NodoChiediElencoFlussi nodeClient = this.getNodeClientInstance(logger);
         FlowsService flowsService = this.getFlowsServiceInstance(logger);
-        ApiConfigClient cacheClient = ApiConfigClient.getInstance();
+        ApiConfigClient cacheClient = this.getCacheClientInstance();
         if(cacheContent == null || (cacheContent.getRetrieveDate() != null && cacheContent.getRetrieveDate().isBefore(LocalDateTime.now()))) {
             synchronized (RetrieveFlows.class) {
                 setCache(cacheClient, logger);
@@ -102,6 +102,10 @@ public class RetrieveFlows {
         } catch (JsonProcessingException e) {
             logger.log(Level.SEVERE, () -> "[RetrieveOrganizationsTrigger]  Error " + e.getLocalizedMessage());
         }
+    }
+
+    public ApiConfigClient getCacheClientInstance() {
+        return ApiConfigClient.getInstance();
     }
 
     public NodoChiediElencoFlussi getNodeClientInstance(Logger logger) {
