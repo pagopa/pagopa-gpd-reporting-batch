@@ -19,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import javax.xml.datatype.DatatypeFactory;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -112,7 +112,7 @@ class RetrieveFlowsTest {
                         .build()
         );
         CacheResponse cacheResponse = CacheResponse.builder()
-                .retrieveDate(LocalDateTime.now())
+                .retrieveDate(LocalDate.now())
                 .creditorInstitutionStations(creditorInstitutionStations)
                 .stations(stations)
                 .build();
