@@ -20,12 +20,13 @@ import it.gov.pagopa.reporting.servicewsdl.FaultBean;
 import it.gov.pagopa.reporting.servicewsdl.TipoElencoFlussiRendicontazione;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Azure Functions with Azure Queue trigger.
@@ -52,12 +53,12 @@ public class RetrieveFlows {
             final ExecutionContext context) {
 
         Logger logger = context.getLogger();
-        logger.log(Level.INFO, () -> String.format("[RetrieveOrganizationsTrigger START] processed the message: %s at %s", message, LocalDateTime.now()));
+        logger.log(Level.INFO, () -> String.format("[RetrieveOrganizationsTrigger START] processed the message: %s at %s", message, LocalDate.now()));
 
         NodoChiediElencoFlussi nodeClient = this.getNodeClientInstance(logger);
         FlowsService flowsService = this.getFlowsServiceInstance(logger);
         ApiConfigClient cacheClient = this.getCacheClientInstance();
-        if(cacheContent == null || (cacheContent.getRetrieveDate() != null && cacheContent.getRetrieveDate().isBefore(LocalDateTime.now()))) {
+        if(cacheContent == null || (cacheContent.getRetrieveDate() != null && cacheContent.getRetrieveDate().isBefore(LocalDate.now()))) {
             synchronized (RetrieveFlows.class) {
                 setCache(cacheClient, logger);
             }
@@ -121,24 +122,24 @@ public class RetrieveFlows {
     }
 
     public Optional<Station> getPAStationIntermediario(String idPa) {
-        List<String> stationPa = getStazioni(idPa);
+        List<String> stationPa = getStations(idPa);
         return cacheContent.getStations().stream()
                 .filter(station -> stationPa.contains(station.getStationCode()))
                 .filter(Station::getEnabled)
                 .findFirst();
     }
 
-    public List<String> getStazioni(String idPa) {
+    public List<String> getStations(String idPa) {
         return cacheContent.getCreditorInstitutionStations().stream()
                 .filter(creditorInstitutionStation -> creditorInstitutionStation.getCreditorInstitutionCode().equals(idPa))
-                .map(CreditorInstitutionStation::getStationCode).toList();
+                .map(CreditorInstitutionStation::getStationCode).collect(Collectors.toList());
     }
 
     public synchronized void setCache(ApiConfigClient cacheClient, Logger logger) {
         try {
             if(cacheContent == null) {
                 cacheContent = cacheClient.getCache();
-                cacheContent.setRetrieveDate(LocalDateTime.now());
+                cacheContent.setRetrieveDate(LocalDate.now());
             }
         } catch (Cache4XXException | Cache5XXException e) {
             cacheContent = null;

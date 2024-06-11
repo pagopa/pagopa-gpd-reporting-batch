@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @NoArgsConstructor
@@ -22,6 +22,6 @@ public class CacheResponse {
     @JsonProperty(value = "creditorInstitutionStations")
     private List<CreditorInstitutionStation> creditorInstitutionStations;
 
-    private LocalDateTime retrieveDate;
+    private LocalDate retrieveDate;
 
 }
