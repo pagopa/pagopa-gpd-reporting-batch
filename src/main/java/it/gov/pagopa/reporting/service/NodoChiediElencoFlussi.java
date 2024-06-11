@@ -17,11 +17,6 @@ public class NodoChiediElencoFlussi {
     private PagamentiTelematiciRPT port;
     private Holder<FaultBean> nodoChiediElencoFlussiRendicontazioneFault;
     private Holder<TipoElencoFlussiRendicontazione> nodoChiediElencoFlussiRendicontazione;
-
-    private final String nodoChiediElencoFlussiRendicontazioneIdentificativoIntermediarioPA = System
-            .getenv("PAA_ID_INTERMEDIARIO");
-    private final String nodoChiediElencoFlussiRendicontazioneIdentificativoStazioneIntermediarioPA = System
-            .getenv("PAA_STAZIONE_INT");
     private final String nodoChiediElencoFlussiRendicontazionePassword = System.getenv("PAA_PASSWORD");
 
     public NodoChiediElencoFlussi(Logger logger) {
@@ -51,13 +46,16 @@ public class NodoChiediElencoFlussi {
                 : null;
     }
 
-    public void nodoChiediElencoFlussiRendicontazione(String idPa) throws ClientTransportException {
+    public void nodoChiediElencoFlussiRendicontazione(String idPa,
+                                                      String idIntermediarioPA,
+                                                      String idStazioneIntermediarioPA) throws ClientTransportException {
 
         var nodoChiediElencoFlussiRendicontazioneFaultLocal = new Holder<FaultBean>();
         var nodoChiediElencoFlussiRendicontazioneElencoFlussiRendicontazioneLocal = new Holder<TipoElencoFlussiRendicontazione>();
 
-        port.nodoChiediElencoFlussiRendicontazione(nodoChiediElencoFlussiRendicontazioneIdentificativoIntermediarioPA,
-                nodoChiediElencoFlussiRendicontazioneIdentificativoStazioneIntermediarioPA,
+        port.nodoChiediElencoFlussiRendicontazione(
+                idIntermediarioPA,
+                idStazioneIntermediarioPA,
                 nodoChiediElencoFlussiRendicontazionePassword, idPa, null,
                 nodoChiediElencoFlussiRendicontazioneFaultLocal,
                 nodoChiediElencoFlussiRendicontazioneElencoFlussiRendicontazioneLocal);
