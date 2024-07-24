@@ -74,6 +74,7 @@ public class RetrieveFlows {
                                     .orElseThrow(() -> new RuntimeException(String.format("No data present in api config database for PA %s", organization)));
                             String idStation = stationBroker.getStationCode();
                             String idBroker = stationBroker.getBrokerCode();
+                            logger.log(Level.INFO, () -> "[RetrieveFlows][NodoChiediElencoFlussiRendicontazione] idPa: " + organization + ", idIntermediario: " + idBroker + ", idStazione: " + idStation );
                             // call NODO dei pagamenti
                             nodeClient.nodoChiediElencoFlussiRendicontazione(organization, idBroker, idStation);
 
@@ -85,7 +86,7 @@ public class RetrieveFlows {
                             if (faultBean != null) {
                                 logger.log(Level.WARNING, () -> "[RetrieveFlows] faultBean DESC " + faultBean.getDescription());
                             } else if (elencoFlussi != null) {
-                                logger.log(Level.INFO, () -> "[RetrieveFlows] elencoFlussi PA " + organization + " TotRestituiti " + elencoFlussi.getTotRestituiti());
+                                logger.log(Level.INFO, () -> "[RetrieveFlows] elencoFlussi PA " + organization + ", idIntermediario: " + idBroker + ", idStazione: " + idStation + " TotRestituiti " + elencoFlussi.getTotRestituiti());
                                 flowsService.flowsProcessing(elencoFlussi.getIdRendicontazione(), organization);
                             }
                         } catch (ClientTransportException e) {
