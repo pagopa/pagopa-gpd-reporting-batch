@@ -86,7 +86,7 @@ public class RetrieveFlows {
                             if (faultBean != null) {
                                 logger.log(Level.WARNING, () -> "[RetrieveFlows] faultBean DESC " + faultBean.getDescription());
                             } else if (elencoFlussi != null) {
-                                logger.log(Level.INFO, () -> "[RetrieveFlows] elencoFlussi PA " + organization + " TotRestituiti " + elencoFlussi.getTotRestituiti());
+                                logger.log(Level.INFO, () -> "[RetrieveFlows] elencoFlussi PA " + organization + ", idIntermediario: " + idBroker + ", idStazione: " + idStation + " TotRestituiti " + elencoFlussi.getTotRestituiti());
                                 flowsService.flowsProcessing(elencoFlussi.getIdRendicontazione(), organization);
                             }
                         } catch (ClientTransportException e) {
