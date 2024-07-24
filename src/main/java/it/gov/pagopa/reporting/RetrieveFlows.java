@@ -74,6 +74,7 @@ public class RetrieveFlows {
                                     .orElseThrow(() -> new RuntimeException(String.format("No data present in api config database for PA %s", organization)));
                             String idStation = stationBroker.getStationCode();
                             String idBroker = stationBroker.getBrokerCode();
+                            logger.log(Level.INFO, () -> "[RetrieveFlows] idPa: " + organization + ", idIntermediario: " + idBroker + ", idStazione: " + idStation );
                             // call NODO dei pagamenti
                             nodeClient.nodoChiediElencoFlussiRendicontazione(organization, idBroker, idStation);
 
