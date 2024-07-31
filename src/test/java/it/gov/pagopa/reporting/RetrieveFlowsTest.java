@@ -78,7 +78,7 @@ class RetrieveFlowsTest {
         doReturn(flowsService).when(function).getFlowsServiceInstance(logger);
         doReturn(cacheClient).when(function).getCacheClientInstance();
 
-        doNothing().when(nodeClient).nodoChiediElencoFlussiRendicontazione(anyString(), anyString(), anyString());
+        doNothing().when(nodeClient).nodoChiediElencoFlussiRendicontazione(anyString(), anyString(), anyString(), anyString());
         when(nodeClient.getNodoChiediElencoFlussiRendicontazioneFault()).thenReturn(null);
         when(nodeClient.getNodoChiediElencoFlussiRendicontazione()).thenReturn(elencoFlussi);// test
         String message = "{\"idPA\":[\"9000000001\",\"9000000002\",\"9000000003\"]}";
@@ -86,7 +86,7 @@ class RetrieveFlowsTest {
 
         // Asserts
         verify(context, times(1)).getLogger();
-        verify(nodeClient, times(3)).nodoChiediElencoFlussiRendicontazione(anyString(), anyString(), anyString());
+        verify(nodeClient, times(3)).nodoChiediElencoFlussiRendicontazione(anyString(), anyString(), anyString(), anyString());
     }
 
     @Test
@@ -96,6 +96,7 @@ class RetrieveFlowsTest {
                 .stationCode("12345_00")
                 .brokerCode("12345")
                 .enabled(true)
+                .password("***")
                 .build());
         List<CreditorInstitutionStation> creditorInstitutionStations = List.of(
                 CreditorInstitutionStation.builder()
@@ -129,7 +130,7 @@ class RetrieveFlowsTest {
 
         // doNothing().when(nodeClient).setSslContext();
 
-        doNothing().when(nodeClient).nodoChiediElencoFlussiRendicontazione(anyString(), anyString(), anyString());
+        doNothing().when(nodeClient).nodoChiediElencoFlussiRendicontazione(anyString(), anyString(), anyString(), anyString());
         when(nodeClient.getNodoChiediElencoFlussiRendicontazioneFault()).thenReturn(objectFactory.createFaultBean());
         when(nodeClient.getNodoChiediElencoFlussiRendicontazione()).thenReturn(null);
         when(cacheClient.getCache()).thenReturn(cacheResponse);
@@ -139,7 +140,7 @@ class RetrieveFlowsTest {
 
         // Asserts
         verify(context, times(1)).getLogger();
-        verify(nodeClient, times(3)).nodoChiediElencoFlussiRendicontazione(anyString(), anyString(), anyString());
+        verify(nodeClient, times(3)).nodoChiediElencoFlussiRendicontazione(anyString(), anyString(), anyString(), anyString());
     }
 
     @Test
