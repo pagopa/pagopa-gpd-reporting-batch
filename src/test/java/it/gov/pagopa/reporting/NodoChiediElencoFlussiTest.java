@@ -54,7 +54,8 @@ class NodoChiediElencoFlussiTest {
         String idPa = "12345";
         String idBroker = "123456";
         String idStazione = "123456_00";
-        nodoChiediElencoFlussi.nodoChiediElencoFlussiRendicontazione(idPa, idBroker, idStazione);
+        String stazionePassword = "***";
+        nodoChiediElencoFlussi.nodoChiediElencoFlussiRendicontazione(idPa, idBroker, idStazione, stazionePassword);
 
         assertTrue(Boolean.TRUE);
     }
