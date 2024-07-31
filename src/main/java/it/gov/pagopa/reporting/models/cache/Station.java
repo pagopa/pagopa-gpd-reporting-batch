@@ -21,4 +21,7 @@ public class Station {
 
     @JsonProperty(value = "broker_code")
     private String brokerCode;
+
+    @JsonProperty(value = "password")
+    private String password;
 }
