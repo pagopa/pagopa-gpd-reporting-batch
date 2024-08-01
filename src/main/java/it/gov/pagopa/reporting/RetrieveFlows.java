@@ -102,7 +102,7 @@ public class RetrieveFlows {
                                 logger.log(Level.SEVERE, () -> "[NODO Connection down]  Max retry exceeded.");
                             }
                         } catch (AppException e) {
-                            logger.log(Level.SEVERE, () -> "[CACHE] Organization: [" + organization + "] Message: " + e.getMessage());
+                            logger.log(Level.SEVERE, () -> "[RetrieveFlows] [AppException] Organization: [" + organization + "] Message: " + e.getMessage());
                         }
 
                     }));
