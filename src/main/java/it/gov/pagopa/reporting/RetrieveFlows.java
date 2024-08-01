@@ -7,6 +7,7 @@ import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.QueueTrigger;
 import com.sun.xml.ws.client.ClientTransportException;
 import it.gov.pagopa.reporting.client.ApiConfigClient;
+import it.gov.pagopa.reporting.exception.AppException;
 import it.gov.pagopa.reporting.exception.Cache4XXException;
 import it.gov.pagopa.reporting.exception.Cache5XXException;
 import it.gov.pagopa.reporting.models.OrganizationsMessage;
@@ -70,8 +71,9 @@ public class RetrieveFlows {
             Arrays.stream(organizationsMessage.getIdPA())
                     .forEach((organization -> {
                         try {
+                            logger.log(Level.INFO, () -> "[RetrieveFlows][Config-Cache][Start] idPa: " + organization);
                             Station stationBroker = getPAStationIntermediario(organization)
-                                    .orElseThrow(() -> new RuntimeException(String.format("No data present in api config database for PA %s", organization)));
+                                    .orElseThrow(() -> new AppException(String.format("No data present in api config database for PA %s", organization)));
                             String idStation = stationBroker.getStationCode();
                             String idBroker = stationBroker.getBrokerCode();
                             String stationPassword = stationBroker.getPassword();
@@ -99,6 +101,8 @@ public class RetrieveFlows {
                             } else {
                                 logger.log(Level.SEVERE, () -> "[NODO Connection down]  Max retry exceeded.");
                             }
+                        } catch (AppException e) {
+                            logger.log(Level.SEVERE, () -> "[RetrieveFlows] [AppException] Organization: [" + organization + "] Message: " + e.getMessage());
                         }
 
                     }));
