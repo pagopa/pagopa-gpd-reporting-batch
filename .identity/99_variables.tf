@@ -6,6 +6,7 @@ locals {
 
   prefix         = "pagopa"
   domain         = "gps"
+  domain_gps         = "gps"
   location_short = "weu"
   product        = "${var.prefix}-${var.env_short}"
 
