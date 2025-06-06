@@ -11,6 +11,8 @@
       "Host.Results": "Error",
       "Function.RetrieveFlows": "Warning",
       "Function.ReportingBatchFunction": "Warning",
+      "Microsoft": "Information",
+      "Worker": "Information",
       "Host.Aggregator": "Error",
       "Host": "Error"
     },
