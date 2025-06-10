@@ -5,7 +5,7 @@
 
     <groupId>it.gov.pagopa.reporting</groupId>
     <artifactId>reporting-batch</artifactId>
-    <version>0.1.17-1-fix-deploy</version>
+    <version>0.1.18</version>
     <packaging>jar</packaging>
 
     <name>Azure Reporting-Batch Fn</name>
